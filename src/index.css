@@ -2,17 +2,207 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Inter', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@layer base {
+  :root {
+    --bg-base: theme(colors.slate.50);
+    --bg-surface: theme(colors.white);
+    --bg-elevated: theme(colors.white);
+    --border: theme(colors.slate.200);
+    --text-primary: theme(colors.slate.900);
+    --text-muted: theme(colors.slate.500);
+    --brand-500: 142 71% 45%;
+    --brand-600: 142 71% 35%;
+    --font-sans: 'Geist', 'Inter';
+  }
+
+  :root[class~='dark'] {
+    --bg-base: #09090b;
+    --bg-surface: #18181b;
+    --bg-elevated: #27272a;
+    --border: #3f3f46;
+    --text-primary: #fafafa;
+    --text-muted: #a1a1aa;
+    --brand-500: 142 71% 45%;
+    --brand-600: 142 71% 35%;
+    --font-sans: 'Geist', 'Inter';
+  }
 }
 
+body {
+  @apply bg-[color:var(--bg-base)] text-[color:var(--text-primary)] font-sans;
+  transition: background-color 0.2s ease;
+}
+
+/* Glassmorphism effect */
+.glass {
+  @apply backdrop-blur-xl bg-[color:var(--bg-surface)]/80 border border-[color:var(--border)]/30;
+}
+
+/* Bento Grid */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-.fade-in {
-  animation: fadeIn 0.5s ease-in-out;
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* 8px Grid System */
+.spacing-1 { margin: 0.25rem; }
+.spacing-2 { margin: 0.5rem; }
+.spacing-3 { margin: 0.75rem; }
+.spacing-4 { margin: 1rem; }
+.spacing-5 { margin: 1.25rem; }
+.spacing-6 { margin: 1.5rem; }
+.spacing-7 { margin: 1.75rem; }
+.spacing-8 { margin: 2rem; }
+.spacing-9 { margin: 2.25rem; }
+.spacing-10 { margin: 2.5rem; }
+
+.padding-1 { padding: 0.25rem; }
+.padding-2 { padding: 0.5rem; }
+.padding-3 { padding: 0.75rem; }
+.padding-4 { padding: 1rem; }
+.padding-5 { padding: 1.25rem; }
+.padding-6 { padding: 1.5rem; }
+.padding-7 { padding: 1.75rem; }
+.padding-8 { padding: 2rem; }
+.padding-9 { padding: 2.25rem; }
+.padding-10 { padding: 2.5rem; }
+
+/* Premium UI Enhancements */
+.shadow-premium {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-premium:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.transition-premium {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .container {
+    max-width: 720px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 960px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1200px;
+  }
+}
+
+/* Mobile-First Approach */
+@media (max-width: 640px) {
+  .text-mobile-lg {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  .padding-mobile {
+    padding: 1rem;
+  }
+}
+
+/* Button States */
+button:active {
+  transform: translateY(1px);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Card Hover Effects */
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Input Focus States */
+input:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(165, 180, 252, 0.5);
+}
+
+/* Animation Library */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(-25%); }
+  50% { transform: translateY(0); }
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+/* Utility Classes */
+.absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-elevated);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--brand-500);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-600);
 }
