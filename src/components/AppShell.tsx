@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Calculator, Home, Menu, X, Moon, Sun, Rocket, Award, ChevronRight, ChevronLeft } from 'lucide-react'
+import { Calculator, Home, Menu, X, Moon, Sun, Award } from 'lucide-react'
 import { useStore } from '../store'
 import { motion, AnimatePresence } from 'framer-motion'
+import { cn } from '../utils/cn'
 
 interface NavItemProps {
   to: string
@@ -17,12 +18,23 @@ function NavItem({ to, icon, label, active, onClick }: NavItemProps) {
     <Link
       to={to}
       onClick={onClick}
-      className={`flex items-center gap-4 px-6 py-4 rounded-xl transition-all duration-200 ${active
-        ? 'bg-[color:var(--brand-500)]/10 text-[color:var(--brand-500)]'
-        : 'text-[color:var(--text-muted)] hover:bg-[color:var(--bg-elevated)] hover:text-[color:var(--text-primary)]'}`}
+      className={cn(
+        "relative flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group",
+        active ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+      )}
     >
-      {icon}
-      <span className="font-medium text-lg">{label}</span>
+      {active && (
+        <motion.div
+          layoutId="nav-active"
+          className="absolute inset-0 bg-primary/10 rounded-xl"
+          initial={false}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        />
+      )}
+      <div className={cn("relative z-10 transition-transform duration-300 group-hover:scale-110", active && "text-primary")}>
+        {icon}
+      </div>
+      <span className="relative z-10 font-medium text-base">{label}</span>
     </Link>
   )
 }
@@ -33,159 +45,199 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { score } = useStore()
   const location = useLocation()
 
+  // Initialize theme
+  useEffect(() => {
+    if (document.documentElement.classList.contains('dark')) {
+      setIsDarkMode(true)
+    } else {
+      setIsDarkMode(false)
+    }
+  }, [])
+
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode)
     document.documentElement.classList.toggle('dark')
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[color:var(--bg-base)]">
-      {/* Mobile Navbar */}
-      <div className="md:hidden bg-[color:var(--bg-surface)] border-b border-[color:var(--border)]">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+    <div className="min-h-screen flex flex-col bg-background selection:bg-primary/30">
+      {/* Dynamic Background Elements */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/20 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-accent/20 blur-[120px]" />
+      </div>
+
+      {/* Mobile Navbar (Glassmorphism) */}
+      <header className="md:hidden sticky top-0 z-40 w-full bg-background/80 backdrop-blur-xl border-b border-border shadow-sm">
+        <div className="container mx-auto px-4 h-16 flex justify-between items-center">
           <Link to="/" className="flex items-center gap-3">
-            <Calculator className="w-8 h-8 text-[color:var(--brand-500)]" />
-            <span className="text-2xl font-bold text-[color:var(--text-primary)]">Math Adventure</span>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow">
+              <Calculator className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+              Math Adventure
+            </span>
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <button
               onClick={toggleDarkMode}
-              className="p-3 rounded-xl hover:bg-[color:var(--bg-elevated)] text-[color:var(--text-muted)] hover:text-[color:var(--text-primary)] transition-all duration-200"
+              className="p-2.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
             >
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={isDarkMode ? 'dark' : 'light'}
+                  initial={{ y: -20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 20, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                </motion.div>
+              </AnimatePresence>
             </button>
             <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-3 rounded-xl hover:bg-[color:var(--bg-elevated)] text-[color:var(--text-muted)] hover:text-[color:var(--text-primary)] transition-all duration-200"
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
             >
-              {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              <Menu className="w-5 h-5" />
             </button>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Desktop Sidebar */}
-      <div className="hidden md:flex flex-col h-screen w-72 bg-[color:var(--bg-surface)] border-r border-[color:var(--border)]">
-        <div className="p-6 border-b border-[color:var(--border)]">
-          <Link to="/" className="flex items-center gap-4">
-            <Calculator className="w-8 h-8 text-[color:var(--brand-500)]" />
-            <span className="text-3xl font-bold text-[color:var(--text-primary)]">Math Adventure</span>
-          </Link>
-        </div>
-
-        <div className="flex-1 p-4 space-y-2">
-          <NavItem
-            to="/"
-            icon={<Home className="w-5 h-5" />}
-            label="Ana Sayfa"
-            active={location.pathname === '/'}
-          />
-          <NavItem
-            to="/game"
-            icon={<Calculator className="w-5 h-5" />}
-            label="Oyun"
-            active={location.pathname === '/game'}
-          />
-        </div>
-
-        <div className="p-6 border-t border-[color:var(--border)]">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <Award className="w-5 h-5 text-[color:var(--brand-500)]" />
-              <span className="text-lg font-medium text-[color:var(--text-primary)]">Puan</span>
-            </div>
-            <span className="font-bold text-xl text-[color:var(--brand-500)]">{score}</span>
+      <div className="flex flex-1 relative z-10">
+        {/* Desktop Sidebar (Glassmorphism) */}
+        <aside className="hidden md:flex flex-col w-72 sticky top-0 h-screen bg-card/50 backdrop-blur-2xl border-r border-border shadow-glass-sm">
+          <div className="p-6">
+            <Link to="/" className="flex items-center gap-3 group">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow group-hover:shadow-primary/50 transition-all duration-500">
+                <Calculator className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-2xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+                Math
+                <br />
+                Adventure
+              </span>
+            </Link>
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {isDarkMode ? <Moon className="w-5 h-5 text-[color:var(--text-muted)]" /> : <Sun className="w-5 h-5 text-[color:var(--text-muted)]" />}
-              <span className="text-lg font-medium text-[color:var(--text-primary)]">Tema</span>
+
+          <nav className="flex-1 px-4 py-6 space-y-2">
+            <NavItem
+              to="/"
+              icon={<Home className="w-5 h-5" />}
+              label="Ana Sayfa"
+              active={location.pathname === '/'}
+            />
+            <NavItem
+              to="/game"
+              icon={<Calculator className="w-5 h-5" />}
+              label="Oyun"
+              active={location.pathname === '/game'}
+            />
+            <NavItem
+              to="/leaderboard"
+              icon={<Award className="w-5 h-5" />}
+              label="Lider Tablosu"
+              active={location.pathname === '/leaderboard'}
+            />
+            <NavItem
+              to="/profile"
+              icon={<Sun className="w-5 h-5" />}
+              label="Profil"
+              active={location.pathname === '/profile'}
+            />
+          </nav>
+
+          <div className="p-6 border-t border-border/50 bg-background/50 backdrop-blur-md">
+            <div className="flex items-center justify-between mb-6 p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/20 rounded-lg">
+                  <Award className="w-5 h-5 text-primary" />
+                </div>
+                <span className="font-medium text-foreground">Skor</span>
+              </div>
+              <span className="font-display font-bold text-2xl text-primary">{score}</span>
             </div>
+            
             <button
               onClick={toggleDarkMode}
-              className={`p-2 rounded-lg transition-all duration-200 ${isDarkMode
-                ? 'bg-[color:var(--brand-500)]/10 text-[color:var(--brand-500)]'
-                : 'bg-[color:var(--bg-elevated)] text-[color:var(--text-muted)] hover:text-[color:var(--text-primary)]'}`}
+              className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-muted transition-all duration-300 group"
             >
-              {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              <div className="flex items-center gap-3 text-muted-foreground group-hover:text-foreground">
+                {isDarkMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+                <span className="font-medium">Tema Değiştir</span>
+              </div>
             </button>
           </div>
-        </div>
+        </aside>
+
+        {/* Mobile Sidebar Overlay */}
+        <AnimatePresence>
+          {isSidebarOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsSidebarOpen(false)}
+                className="md:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-50"
+              />
+              <motion.aside
+                initial={{ x: '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="md:hidden fixed inset-y-0 left-0 w-3/4 max-w-sm bg-card border-r border-border shadow-2xl z-50 flex flex-col"
+              >
+                <div className="p-4 border-b border-border flex justify-between items-center">
+                  <span className="text-xl font-display font-bold">Menü</span>
+                  <button
+                    onClick={() => setIsSidebarOpen(false)}
+                    className="p-2 rounded-xl hover:bg-muted text-muted-foreground"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <nav className="flex-1 p-4 space-y-2">
+                  <NavItem
+                    to="/"
+                    icon={<Home className="w-5 h-5" />}
+                    label="Ana Sayfa"
+                    active={location.pathname === '/'}
+                    onClick={() => setIsSidebarOpen(false)}
+                  />
+                  <NavItem
+                    to="/game"
+                    icon={<Calculator className="w-5 h-5" />}
+                    label="Oyun"
+                    active={location.pathname === '/game'}
+                    onClick={() => setIsSidebarOpen(false)}
+                  />
+                  <NavItem
+                    to="/leaderboard"
+                    icon={<Award className="w-5 h-5" />}
+                    label="Lider Tablosu"
+                    active={location.pathname === '/leaderboard'}
+                    onClick={() => setIsSidebarOpen(false)}
+                  />
+                  <NavItem
+                    to="/profile"
+                    icon={<Sun className="w-5 h-5" />}
+                    label="Profil"
+                    active={location.pathname === '/profile'}
+                    onClick={() => setIsSidebarOpen(false)}
+                  />
+                </nav>
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* Main Content Area */}
+        <main className="flex-1 overflow-y-auto w-full">
+          {children}
+        </main>
       </div>
-
-      {/* Mobile Sidebar */}
-      <AnimatePresence>
-        {isSidebarOpen && (
-          <motion.div
-            initial={{ x: '-100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="md:hidden fixed inset-0 bg-[color:var(--bg-surface)] z-50 flex flex-col"
-          >
-            <div className="p-6 border-b border-[color:var(--border)]">
-              <div className="flex justify-between items-center">
-                <Link to="/" className="flex items-center gap-3" onClick={() => setIsSidebarOpen(false)}>
-                  <Calculator className="w-8 h-8 text-[color:var(--brand-500)]" />
-                  <span className="text-2xl font-bold text-[color:var(--text-primary)]">Math Adventure</span>
-                </Link>
-                <button
-                  onClick={() => setIsSidebarOpen(false)}
-                  className="p-3 rounded-xl hover:bg-[color:var(--bg-elevated)] text-[color:var(--text-muted)] hover:text-[color:var(--text-primary)] transition-all duration-200"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-            </div>
-
-            <div className="p-4 space-y-2 flex-1">
-              <NavItem
-                to="/"
-                icon={<Home className="w-5 h-5" />}
-                label="Ana Sayfa"
-                active={location.pathname === '/'}
-                onClick={() => setIsSidebarOpen(false)}
-              />
-              <NavItem
-                to="/game"
-                icon={<Calculator className="w-5 h-5" />}
-                label="Oyun"
-                active={location.pathname === '/game'}
-                onClick={() => setIsSidebarOpen(false)}
-              />
-            </div>
-
-            <div className="p-6 border-t border-[color:var(--border)]">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <Award className="w-5 h-5 text-[color:var(--brand-500)]" />
-                  <span className="text-lg font-medium text-[color:var(--text-primary)]">Puan</span>
-                </div>
-                <span className="font-bold text-xl text-[color:var(--brand-500)]">{score}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {isDarkMode ? <Moon className="w-5 h-5 text-[color:var(--text-muted)]" /> : <Sun className="w-5 h-5 text-[color:var(--text-muted)]" />}
-                  <span className="text-lg font-medium text-[color:var(--text-primary)]">Tema</span>
-                </div>
-                <button
-                  onClick={toggleDarkMode}
-                  className={`p-2 rounded-lg transition-all duration-200 ${isDarkMode
-                    ? 'bg-[color:var(--brand-500)]/10 text-[color:var(--brand-500)]'
-                    : 'bg-[color:var(--bg-elevated)] text-[color:var(--text-muted)] hover:text-[color:var(--text-primary)]'}`}
-                >
-                  {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        {children}
-      </main>
     </div>
   )
 }
