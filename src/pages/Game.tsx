@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { useStore } from '../store'
 import { generateQuestion } from '../utils/math'
-import { Timer, Award, CheckCircle, XCircle, Lightbulb, BarChart2, Clock, Target, Rocket, RefreshCw } from 'lucide-react'
+import { Timer, Award, CheckCircle, XCircle, Lightbulb, BarChart2, Clock, Target, Rocket, RefreshCw, ArrowRight } from 'lucide-react'
 import { cn } from '../utils/cn'
 
 interface Question {
